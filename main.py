@@ -27,17 +27,17 @@ def fcolorLines(lines):
         colorLines[0][3] = 1
         colorLines[0][4] = 1
     if (lines[1]):
-        colorLines[1][0] = 1
-        colorLines[1][1] = 1
-        colorLines[1][2] = 1
-        colorLines[1][3] = 1
-        colorLines[1][4] = 1
+        colorLines[1][0] = 5
+        colorLines[1][1] = 5
+        colorLines[1][2] = 5
+        colorLines[1][3] = 5
+        colorLines[1][4] = 5
     if (lines[2]):
-        colorLines[2][0] = 1
-        colorLines[2][1] = 1
-        colorLines[2][2] = 1
-        colorLines[2][3] = 1
-        colorLines[2][4] = 1
+        colorLines[2][0] = 6
+        colorLines[2][1] = 6
+        colorLines[2][2] = 6
+        colorLines[2][3] = 6
+        colorLines[2][4] = 6
     if (lines[3]):
         colorLines[0][0] = 2
         colorLines[1][1] = 2
@@ -203,29 +203,60 @@ def calculateWin(line):
     number_occurrence = 0
     for i in range(0, (len(line) - 2)):
         number_occurrence += 1
+        buf = line[i] #bird
         if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
-            i += 1
-            if line[i] != line[i + 2]:
-                amount += win[str(line[i])][i]
+
+            while i + 1 < len(line) - 1 and line[i + 1] == 'DIAMOND':
+                i+=1 #i=1
+                number_occurrence += 1
+            if(line[i + 1] == len(line) - 1):
+                number_occurrence += 1
                 break
-            continue
-        elif isNotTheSame(line[i], line[i + 1]):
-            amount += win[str(line[i])][i]
+           # if line[i] != line[i + 2]:
+             #   amount += win[str(line[i])][i]
+             #   break
+            #i += 1
+            #continue
+        if isNotTheSame(buf, line[i + 1]):
+            amount += win[str(buf)][i]
+            #print(i)
             break
 
     if number_occurrence >= len(line) - 1:
         return amount
     line = line[::-1]
+    number_occurrence = 0
     for i in range(0, (len(line) - 2)):
+        number_occurrence += 1
+        buf = line[i]
         if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
-            i += 1
-            if line[i] != line[i + 2]:
-                amount += win[str(line[i])][i]
+            while i + 1 < len(line) - 1 and line[i + 1] == 'DIAMOND':
+                i += 1
+                number_occurrence += 1
+            if (line[i + 1] == len(line) - 1):
+                number_occurrence += 1
                 break
-            continue
-        elif isNotTheSame(line[i], line[i + 1]):
-            amount += win[str(line[i])][i]
+            # if line[i] != line[i + 2]:
+            #   amount += win[str(line[i])][i]
+            #   break
+            # i += 1
+            #continue
+        if isNotTheSame(buf, line[i + 1]):
+            amount += win[str(buf)][i]
+            #print(i)
             break
+
+    #for i in range(0, (len(line) - 2)):
+     #   if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
+#
+ #           if line[i] != line[i + 2]:
+  #              amount += win[str(line[i])][i]
+   #             break
+    #        i += 1
+     #       continue
+      #  elif isNotTheSame(line[i], line[i + 1]):
+       #     amount += win[str(line[i])][i]
+        #    break
 
     return amount
 
