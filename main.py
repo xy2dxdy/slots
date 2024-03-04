@@ -17,7 +17,8 @@ reel4 = excel_data_df['Reel 4'].tolist()[0:34]
 reel5 = excel_data_df['Reel 5'].tolist()[0:34]
 slot = [[], [], []]
 colorLines = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
-
+freespins = {0: 0, 1: 0, 2: 0, 3: 10, 4: 15, 5: 25}
+countOfFreespins = 0
 
 def fcolorLines(lines):
     if lines[0] == True:
@@ -260,6 +261,13 @@ def calculateWin(line):
 
     return amount
 
+def countOfScatters():
+    count = 0
+    for a in slot:
+        for b in a:
+            if b == 'MAP':
+                count += 1
+    return count
 
 if __name__ == '__main__':
 
@@ -283,5 +291,9 @@ if __name__ == '__main__':
                 winningLines[i] = True
         printSlot(winningLines)
         print(winnings)
+        countOfFreespins = freespins[countOfScatters()]
+        if(countOfFreespins > 0):
+            print(str(countOfFreespins)+" фриспинов")
+            print("Нажмите, чтобы начать фриспины")
         input()
         #os.system('cls')
