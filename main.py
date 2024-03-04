@@ -1,26 +1,23 @@
 from __future__ import print_function
 
-import array
+import os
 import random
 import pandas
+
 win = {'DIAMOND': [0, 0, 0, 0, 0], 'GORILLA': [0, 2, 25, 100, 1000],
        'MAN': [0, 0, 20, 100, 500], 'BIRD': [0, 0, 15, 50, 250],
        'BUTTERFLY': [0, 0, 15, 50, 250], 'A': [0, 0, 5, 25, 150],
        'K': [0, 0, 5, 25, 150], 'Q': [0, 0, 5, 20, 100],
-       'J': [0, 0, 5, 20, 100], '10': [0, 0, 5, 20, 100], '9': [0, 1, 5, 10, 500], 'MAP': [0, 1, 5, 10, 500]}
+       'J': [0, 0, 5, 20, 100], '10': [0, 0, 5, 20, 100], '9': [0, 0, 5, 20, 100], 'MAP': [0, 1, 5, 10, 500]}
 excel_data_df = pandas.read_excel('Барабаны.xlsx', sheet_name='Sheet1', header=3)
 reel1 = excel_data_df['Reel 1'].tolist()[0:40]
 reel2 = excel_data_df['Reel 2'].tolist()[0:38]
 reel3 = excel_data_df['Reel 3'].tolist()[0:41]
 reel4 = excel_data_df['Reel 4'].tolist()[0:34]
 reel5 = excel_data_df['Reel 5'].tolist()[0:34]
-print(reel1)
-print(reel2)
-print(reel3)
-print(reel4)
-print(reel5)
 slot = [[], [], []]
 colorLines = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+
 
 def fcolorLines(lines):
     if lines[0] == True:
@@ -29,7 +26,7 @@ def fcolorLines(lines):
         colorLines[0][2] = 1
         colorLines[0][3] = 1
         colorLines[0][4] = 1
-    if(lines[1]):
+    if (lines[1]):
         colorLines[1][0] = 1
         colorLines[1][1] = 1
         colorLines[1][2] = 1
@@ -83,20 +80,40 @@ def fcolorLines(lines):
         colorLines[2][2] = 3
         colorLines[1][3] = 3
         colorLines[1][4] = 3
+
+
 def out_white(text):
-    print('%-10s' % "\033[38m{}".format(text), end='')
+    print('%-15s' % "\033[38m{}".format(text), end='')
+
+
 def out_red(text):
-    print('%-10s' % "\033[31m{}".format(text))
+    print('%-15s' % "\033[31m{}".format(text), end='')
+
+
 def out_green(text):
-    print('%-10s' % "\033[32m{}".format(text))
+    print('%-15s' % "\033[32m{}".format(text), end='')
+
+
 def out_yellow(text):
-    print('%-10s' % "\033[33m{}".format(text))
+    print('%-15s' % "\033[33m{}".format(text), end='')
+
+
 def out_blue(text):
-    print('%-10s' % "\033[34m{}".format(text))
+    print('%-15s' % "\033[34m{}".format(text), end='')
+
+
 def out_perple(text):
-    print('%-10s' % "\033[35m{}".format(text))
+    print('%-15s' % "\033[35m{}".format(text), end='')
+
+
 def out_turquoise(text):
-    print('%-10s' % "\033[36m{}".format(text))
+    print('%-15s' % "\033[36m{}".format(text), end='')
+
+
+def clearColorLines():
+    colorLines[0] = [0, 0, 0, 0, 0]
+    colorLines[1] = [0, 0, 0, 0, 0]
+    colorLines[2] = [0, 0, 0, 0, 0]
 
 
 def spin():
@@ -111,7 +128,7 @@ def spin():
         r1 = 0
     else:
         r1 += 1
-    if (r2 == len(reel2) - 1):
+    if r2 == len(reel2) - 1:
         r2 = 0
     else:
         r2 += 1
@@ -119,7 +136,7 @@ def spin():
         r3 = 0
     else:
         r3 += 1
-    if (r4 == len(reel4) - 1):
+    if r4 == len(reel4) - 1:
         r4 = 0
     else:
         r4 += 1
@@ -172,19 +189,27 @@ def printSlot(lines):
             else:
                 out_white(slot[i][j])
 
-        print()
-
-   # for el in slot:
-    #    print('%-10s %-10s %-10s %-10s %-10s' % (str(el[0]), str(el[1]), str(el[2]), str(
-     #       el[3]), str(el[4])), end='')
+        print("\033[38m{}".format(''))
     print("--------------------------------------------------------")
+
+
+def isNotTheSame(a, b):
+    return a != b and not (
+            (a == 'DIAMOND' and b != 'MAP') or (b == 'DIAMOND' and a != 'MAP'))
+
 
 def calculateWin(line):
     amount = 0
     number_occurrence = 0
     for i in range(0, (len(line) - 2)):
         number_occurrence += 1
-        if line[i] != line[i + 1]:
+        if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
+            i += 1
+            if line[i] != line[i + 2]:
+                amount += win[str(line[i])][i]
+                break
+            continue
+        elif isNotTheSame(line[i], line[i + 1]):
             amount += win[str(line[i])][i]
             break
 
@@ -192,30 +217,40 @@ def calculateWin(line):
         return amount
     line = line[::-1]
     for i in range(0, (len(line) - 2)):
-        if line[i] != line[i + 1]:
+        if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
+            i += 1
+            if line[i] != line[i + 2]:
+                amount += win[str(line[i])][i]
+                break
+            continue
+        elif isNotTheSame(line[i], line[i + 1]):
             amount += win[str(line[i])][i]
             break
+
     return amount
 
 
 if __name__ == '__main__':
-    spin()
-    winnings = 0
-    winningLines = [False]*10
-    lines = [slot[0], slot[1], slot[2],
-             [slot[0][0], slot[1][1], slot[2][2], slot[1][3], slot[0][4]],
-             [slot[2][0], slot[1][1], slot[0][2], slot[1][3], slot[2][4]],
-             [slot[1][0], slot[2][1], slot[2][2], slot[2][3], slot[1][4]],
-             [slot[1][0], slot[0][1], slot[0][2], slot[0][3], slot[1][4]],
-             [slot[2][0], slot[2][1], slot[1][2], slot[2][3], slot[2][4]],
-             [slot[0][0], slot[0][1], slot[1][2], slot[0][3], slot[0][4]],
-             [slot[1][0], slot[1][1], slot[2][2], slot[1][3], slot[1][4]]]
-    for i in range(0, len(lines) - 1):
-        print(lines[i])
-        win1 = calculateWin(lines[i])
-        winnings += win1
-        if win1 != 0:
-            winningLines[i] = True
-    printSlot(winningLines)
-    print(winnings)
 
+    while True:
+        clearColorLines()
+        spin()
+        winnings = 0
+        winningLines = [False] * 10
+        lines = [slot[0], slot[1], slot[2],
+                 [slot[0][0], slot[1][1], slot[2][2], slot[1][3], slot[0][4]],
+                 [slot[2][0], slot[1][1], slot[0][2], slot[1][3], slot[2][4]],
+                 [slot[1][0], slot[2][1], slot[2][2], slot[2][3], slot[1][4]],
+                 [slot[1][0], slot[0][1], slot[0][2], slot[0][3], slot[1][4]],
+                 [slot[2][0], slot[2][1], slot[1][2], slot[2][3], slot[2][4]],
+                 [slot[0][0], slot[0][1], slot[1][2], slot[0][3], slot[0][4]],
+                 [slot[1][0], slot[1][1], slot[2][2], slot[1][3], slot[1][4]]]
+        for i in range(0, len(lines) - 1):
+            win1 = calculateWin(lines[i])
+            winnings += win1
+            if win1 != 0:
+                winningLines[i] = True
+        printSlot(winningLines)
+        print(winnings)
+        input()
+        #os.system('cls')
