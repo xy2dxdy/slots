@@ -10,7 +10,6 @@ if __name__ == '__main__':
     for i in range(0, corner):
         if FreeSpinsCount > 0:
             FreeSpinsCount -= 1
-            corner += 1
         generate_slots()
         CurrentRollMoney, WinningLines = calculate_slots_win()
         print_slot(WinningLines)

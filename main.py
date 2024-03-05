@@ -172,16 +172,18 @@ if __name__ == '__main__':
     FreeSpinsCount = 0
     MoneyForOneRoll = int(input("Enter the amount of money per roll: "))
     TotalMoney = 100
-
     print("You have " + str(TotalMoney) + " money.")
     print("Press, to roll spin for " + str(MoneyForOneRoll) + " moneys")
     input()
     os.system('cls||clear')
     while True:
+        factor = 1
         if FreeSpinsCount > 0:
             FreeSpinsCount -= 1
+            factor = 2
         else:
             TotalMoney -= MoneyForOneRoll
+            factor = 1
         print("You have " + str(TotalMoney) + " money.")
 
         generate_slots()
@@ -190,6 +192,7 @@ if __name__ == '__main__':
         count_scat = count_scatters()
         FreeSpinsCount += FreeSpins[count_scat]
         CurrentRollMoney += SymbolsCost['MAP'][count_scat]
+        CurrentRollMoney *= factor
         TotalMoney += CurrentRollMoney
 
         print("You got: " + str(CurrentRollMoney) + " from roll")
