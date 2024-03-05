@@ -18,8 +18,8 @@ if __name__ == '__main__':
         count_scat = count_scatters()
         FreeSpinsCount += FreeSpins[count_scat]
         CurrentRollMoney += SymbolsCost['MAP'][count_scat]
-        CurrentRollMoney *= factor
-        TotalMoney += CurrentRollMoney
+        TotalMoney += CurrentRollMoney * factor
     print("Got: " + str(TotalMoney))
     print("Spent: " + str(SpentMoney))
     print("RTP= " + str(float(TotalMoney) / SpentMoney * 100))
+    print("Average win: " + str(float(TotalMoney)/number))
