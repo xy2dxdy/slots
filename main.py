@@ -1,299 +1,203 @@
-from __future__ import print_function
-
 import os
 import random
+
+import colorama
 import pandas
 
-win = {'DIAMOND': [0, 0, 0, 0, 0], 'GORILLA': [0, 2, 25, 100, 1000],
-       'MAN': [0, 0, 20, 100, 500], 'BIRD': [0, 0, 15, 50, 250],
-       'BUTTERFLY': [0, 0, 15, 50, 250], 'A': [0, 0, 5, 25, 150],
-       'K': [0, 0, 5, 25, 150], 'Q': [0, 0, 5, 20, 100],
-       'J': [0, 0, 5, 20, 100], '10': [0, 0, 5, 20, 100], '9': [0, 0, 5, 20, 100], 'MAP': [0, 1, 5, 10, 500]}
-excel_data_df = pandas.read_excel('Барабаны.xlsx', sheet_name='Sheet1', header=3)
-reel1 = excel_data_df['Reel 1'].tolist()[0:40]
-reel2 = excel_data_df['Reel 2'].tolist()[0:38]
-reel3 = excel_data_df['Reel 3'].tolist()[0:41]
-reel4 = excel_data_df['Reel 4'].tolist()[0:34]
-reel5 = excel_data_df['Reel 5'].tolist()[0:34]
-slot = [[], [], []]
-colorLines = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
-freespins = {0: 0, 1: 0, 2: 0, 3: 10, 4: 15, 5: 25}
-countOfFreespins = 0
+SymbolsCost = {
+    'DIAMOND': [0, 0, 0, 0, 0],
+    'GORILLA': [0, 2, 25, 100, 1000],
+    'MAN': [0, 0, 20, 100, 500],
+    'BIRD': [0, 0, 15, 50, 250],
+    'BUTTERFLY': [0, 0, 15, 50, 250],
+    'A': [0, 0, 5, 25, 150],
+    'K': [0, 0, 5, 25, 150],
+    'Q': [0, 0, 5, 20, 100],
+    'J': [0, 0, 5, 20, 100],
+    '10': [0, 0, 5, 20, 100],
+    '9': [0, 0, 5, 20, 100],
+    'MAP': [0, 0, 1, 5, 10, 500]
+}
 
-def fcolorLines(lines):
-    if lines[0] == True:
-        colorLines[0][0] = 1
-        colorLines[0][1] = 1
-        colorLines[0][2] = 1
-        colorLines[0][3] = 1
-        colorLines[0][4] = 1
-    if (lines[1]):
-        colorLines[1][0] = 5
-        colorLines[1][1] = 5
-        colorLines[1][2] = 5
-        colorLines[1][3] = 5
-        colorLines[1][4] = 5
-    if (lines[2]):
-        colorLines[2][0] = 6
-        colorLines[2][1] = 6
-        colorLines[2][2] = 6
-        colorLines[2][3] = 6
-        colorLines[2][4] = 6
-    if (lines[3]):
-        colorLines[0][0] = 2
-        colorLines[1][1] = 2
-        colorLines[2][2] = 2
-        colorLines[1][3] = 2
-        colorLines[0][4] = 2
-    if (lines[4]):
-        colorLines[2][0] = 3
-        colorLines[1][1] = 3
-        colorLines[0][2] = 3
-        colorLines[1][3] = 3
-        colorLines[2][4] = 3
-    if (lines[5]):
-        colorLines[1][0] = 4
-        colorLines[2][1] = 4
-        colorLines[2][2] = 4
-        colorLines[2][3] = 4
-        colorLines[1][4] = 4
-    if (lines[6]):
-        colorLines[1][0] = 5
-        colorLines[0][1] = 5
-        colorLines[0][2] = 5
-        colorLines[0][3] = 5
-        colorLines[1][4] = 5
-    if (lines[7]):
-        colorLines[2][0] = 6
-        colorLines[2][1] = 6
-        colorLines[1][2] = 6
-        colorLines[2][3] = 6
-        colorLines[2][4] = 6
-    if (lines[8]):
-        colorLines[0][0] = 2
-        colorLines[0][1] = 2
-        colorLines[1][2] = 2
-        colorLines[0][3] = 2
-        colorLines[0][4] = 2
-    if (lines[9]):
-        colorLines[1][0] = 3
-        colorLines[1][1] = 3
-        colorLines[2][2] = 3
-        colorLines[1][3] = 3
-        colorLines[1][4] = 3
+FreeSpins = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 10,
+    4: 15,
+    5: 25
+}
 
 
-def out_white(text):
-    print('%-15s' % "\033[38m{}".format(text), end='')
+def create_value_index_pairs(in_line_indexes):
+    value_index_pairs = []
+    for row_idx, row in enumerate(in_line_indexes):
+        value_index_pairs.append([])
+        for col_idx, value in enumerate(row):
+            value_index_pairs[row_idx].append([value, col_idx])
+    return value_index_pairs
 
 
-def out_red(text):
-    print('%-15s' % "\033[31m{}".format(text), end='')
+LineIndexes = [
+    [0, 0, 0, 0, 0],  # Top line
+    [1, 1, 1, 1, 1],  # Middle line
+    [2, 2, 2, 2, 2],  # Bottom line
+    [0, 1, 2, 1, 0],  # V line
+    [2, 1, 0, 1, 2],  # reverse V line
+    [1, 2, 2, 2, 1],  # U line,
+    [1, 0, 0, 0, 1],  # reverse, U line
+    [2, 2, 1, 2, 2],
+    [0, 0, 1, 0, 0],
+    [1, 1, 2, 1, 1],
+]
+
+LineColors = {
+    0: colorama.Fore.RESET,
+    1: colorama.Fore.GREEN,
+    2: colorama.Fore.CYAN,
+    3: colorama.Fore.YELLOW,
+    4: colorama.Fore.MAGENTA,
+    5: colorama.Fore.BLUE,
+    6: colorama.Fore.LIGHTGREEN_EX,
+    7: colorama.Fore.LIGHTYELLOW_EX,
+    8: colorama.Fore.LIGHTBLUE_EX,
+    9: colorama.Fore.LIGHTRED_EX
+}
+ExcelData = pandas.read_excel('Барабаны.xlsx', sheet_name='Sheet1', header=3)
+Reels: list[list[str]] = [
+    ExcelData['Reel 1'].tolist()[0:40],
+    ExcelData['Reel 2'].tolist()[0:38],
+    ExcelData['Reel 3'].tolist()[0:41],
+    ExcelData['Reel 4'].tolist()[0:34],
+    ExcelData['Reel 5'].tolist()[0:34]
+]
+MatrixLineIndexes = create_value_index_pairs(LineIndexes)
+Slots = []
+LinesColors = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
 
 
-def out_green(text):
-    print('%-15s' % "\033[32m{}".format(text), end='')
+def fcolor_lines(winning_lines):
+    LinesColors[0] = [0, 0, 0, 0, 0]
+    LinesColors[1] = [0, 0, 0, 0, 0]
+    LinesColors[2] = [0, 0, 0, 0, 0]
+    for ind, is_win in enumerate(winning_lines):
+        if is_win:
+            for indexes in MatrixLineIndexes[ind]:
+                LinesColors[indexes[0]][indexes[1]] = ind + 1
 
 
-def out_yellow(text):
-    print('%-15s' % "\033[33m{}".format(text), end='')
+def print_colorized(text, index):
+    print(f"{LineColors[index]}{text.ljust(14, ' ')}{colorama.Style.RESET_ALL}", end='')
 
 
-def out_blue(text):
-    print('%-15s' % "\033[34m{}".format(text), end='')
+def generate_slots():
+    Slots.clear()
+    random_index_in_reels = [random.randint(0, len(reel) - 1) for reel in Reels]
+    for height in range(0, 3):
+        line = []
+        for ind in range(0, len(Reels)):
+            index = random_index_in_reels[ind]
+            line.append(Reels[ind][(index + height) % len(Reels[ind])])
+        Slots.append(line)
 
 
-def out_perple(text):
-    print('%-15s' % "\033[35m{}".format(text), end='')
+def print_slot(winning_lines):
+    fcolor_lines(winning_lines)
+    print()
+    print("-" * 70)
+    for ind_x, slot_line in enumerate(Slots):
+        for ind_y, slot in enumerate(slot_line):
+            print_colorized(str(slot), LinesColors[ind_x][ind_y])
+        print()
+    print("-" * 70)
 
 
-def out_turquoise(text):
-    print('%-15s' % "\033[36m{}".format(text), end='')
-
-
-def clearColorLines():
-    colorLines[0] = [0, 0, 0, 0, 0]
-    colorLines[1] = [0, 0, 0, 0, 0]
-    colorLines[2] = [0, 0, 0, 0, 0]
-
-
-def spin():
-    r1 = random.randint(1, len(reel1) - 1)
-    r2 = random.randint(1, len(reel2) - 1)
-    r3 = random.randint(1, len(reel3) - 1)
-    r4 = random.randint(1, len(reel4) - 1)
-    r5 = random.randint(1, len(reel5) - 1)
-    slot[0] = [reel1[r1], reel2[r2], reel3[r3], reel4[r4], reel5[r5]]
-
-    if (r1 == len(reel1) - 1):
-        r1 = 0
-    else:
-        r1 += 1
-    if r2 == len(reel2) - 1:
-        r2 = 0
-    else:
-        r2 += 1
-    if (r3 == len(reel3) - 1):
-        r3 = 0
-    else:
-        r3 += 1
-    if r4 == len(reel4) - 1:
-        r4 = 0
-    else:
-        r4 += 1
-    if (r5 == len(reel5) - 1):
-        r5 = 0
-    else:
-        r5 += 1
-    slot[1] = [reel1[r1], reel2[r2], reel3[r3], reel4[r4], reel5[r5]]
-
-    if (r1 == len(reel1) - 1):
-        r1 = 0
-    else:
-        r1 += 1
-    if (r2 == len(reel2) - 1):
-        r2 = 0
-    else:
-        r2 += 1
-    if (r3 == len(reel3) - 1):
-        r3 = 0
-    else:
-        r3 += 1
-    if (r4 == len(reel4) - 1):
-        r4 = 0
-    else:
-        r4 += 1
-    if (r5 == len(reel5) - 1):
-        r5 = 0
-    else:
-        r5 += 1
-    slot[2] = [reel1[r1], reel2[r2], reel3[r3], reel4[r4], reel5[r5]]
-
-
-def printSlot(lines):
-    fcolorLines(lines)
-    print("\n" + "--------------------------------------------------------")
-    for i in range(0, len(slot)):
-        for j in range(0, len(slot[i])):
-            if colorLines[i][j] == 1:
-                out_red(str(slot[i][j]))
-            elif colorLines[i][j] == 2:
-                out_perple(slot[i][j])
-            elif colorLines[i][j] == 3:
-                out_blue(slot[i][j])
-            elif colorLines[i][j] == 4:
-                out_green(slot[i][j])
-            elif colorLines[i][j] == 5:
-                out_yellow(slot[i][j])
-            elif colorLines[i][j] == 6:
-                out_turquoise(slot[i][j])
-            else:
-                out_white(slot[i][j])
-
-        print("\033[38m{}".format(''))
-    print("--------------------------------------------------------")
-
-
-def isNotTheSame(a, b):
+def compare_symbols(a, b):
     return a != b and not (
             (a == 'DIAMOND' and b != 'MAP') or (b == 'DIAMOND' and a != 'MAP'))
 
 
-def calculateWin(line):
+def calculate_slots_win():
+    current_roll_money = 0
+    winning_lines = [False] * 10
+    lines = [[Slots[y[0]][y[1]] for y in x] for x in MatrixLineIndexes]
+    for i in range(0, len(lines) - 1):
+        win1 = calculate_line_win(lines[i])
+        current_roll_money += win1
+        if win1 != 0:
+            winning_lines[i] = True
+    return current_roll_money, winning_lines
+
+
+def calculate_line_win(line):
     amount = 0
-    number_occurrence = 0
-    for i in range(0, (len(line) - 2)):
-        number_occurrence += 1
-        buf = line[i] #bird
-        if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
-
-            while i + 1 < len(line) - 1 and line[i + 1] == 'DIAMOND':
-                i+=1 #i=1
-                number_occurrence += 1
-            if(line[i + 1] == len(line) - 1):
-                number_occurrence += 1
-                break
-           # if line[i] != line[i + 2]:
-             #   amount += win[str(line[i])][i]
-             #   break
-            #i += 1
-            #continue
-        if isNotTheSame(buf, line[i + 1]):
-            amount += win[str(buf)][i]
-            #print(i)
-            break
-
+    number_occurrence, amount = get_money_from_left(line, amount)
     if number_occurrence >= len(line) - 1:
         return amount
     line = line[::-1]
-    number_occurrence = 0
-    for i in range(0, (len(line) - 2)):
-        number_occurrence += 1
-        buf = line[i]
-        if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
-            while i + 1 < len(line) - 1 and line[i + 1] == 'DIAMOND':
-                i += 1
-                number_occurrence += 1
-            if (line[i + 1] == len(line) - 1):
-                number_occurrence += 1
-                break
-            # if line[i] != line[i + 2]:
-            #   amount += win[str(line[i])][i]
-            #   break
-            # i += 1
-            #continue
-        if isNotTheSame(buf, line[i + 1]):
-            amount += win[str(buf)][i]
-            #print(i)
-            break
-
-    #for i in range(0, (len(line) - 2)):
-     #   if line[i + 1] == 'DIAMOND' and line[i] != 'MAP':
-#
- #           if line[i] != line[i + 2]:
-  #              amount += win[str(line[i])][i]
-   #             break
-    #        i += 1
-     #       continue
-      #  elif isNotTheSame(line[i], line[i + 1]):
-       #     amount += win[str(line[i])][i]
-        #    break
-
+    number_occurrence, amount = get_money_from_left(line, amount)
     return amount
 
-def countOfScatters():
+
+def get_money_from_left(line, in_amount):
+    number_occurrence = 0
+    for ind in range(0, (len(line) - 2)):
+        number_occurrence += 1
+        buf = line[ind]
+        if line[ind] == 'MAP':
+            break
+        if line[ind + 1] == 'DIAMOND' and line[ind] != 'MAP':
+            while ind + 1 < len(line) - 1 and line[ind + 1] == 'DIAMOND':
+                ind += 1
+                number_occurrence += 1
+            if line[ind + 1] == len(line) - 1:
+                number_occurrence += 1
+                break
+        if compare_symbols(buf, line[ind + 1]):
+            in_amount += SymbolsCost[str(buf)][ind]
+            break
+    return number_occurrence, in_amount
+
+
+def count_scatters():
     count = 0
-    for a in slot:
+    for a in Slots:
         for b in a:
             if b == 'MAP':
                 count += 1
     return count
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
+    FreeSpinsCount = 0
+    MoneyForOneRoll = int(input("Enter the amount of money per roll: "))
+    TotalMoney = 100
+
+    print("You have " + str(TotalMoney) + " money.")
+    print("Press, to roll spin for " + str(MoneyForOneRoll) + " moneys")
+    input()
+    os.system('cls||clear')
     while True:
-        clearColorLines()
-        spin()
-        winnings = 0
-        winningLines = [False] * 10
-        lines = [slot[0], slot[1], slot[2],
-                 [slot[0][0], slot[1][1], slot[2][2], slot[1][3], slot[0][4]],
-                 [slot[2][0], slot[1][1], slot[0][2], slot[1][3], slot[2][4]],
-                 [slot[1][0], slot[2][1], slot[2][2], slot[2][3], slot[1][4]],
-                 [slot[1][0], slot[0][1], slot[0][2], slot[0][3], slot[1][4]],
-                 [slot[2][0], slot[2][1], slot[1][2], slot[2][3], slot[2][4]],
-                 [slot[0][0], slot[0][1], slot[1][2], slot[0][3], slot[0][4]],
-                 [slot[1][0], slot[1][1], slot[2][2], slot[1][3], slot[1][4]]]
-        for i in range(0, len(lines) - 1):
-            win1 = calculateWin(lines[i])
-            winnings += win1
-            if win1 != 0:
-                winningLines[i] = True
-        printSlot(winningLines)
-        print(winnings)
-        countOfFreespins = freespins[countOfScatters()]
-        if(countOfFreespins > 0):
-            print(str(countOfFreespins)+" фриспинов")
-            print("Нажмите, чтобы начать фриспины")
+        if FreeSpinsCount > 0:
+            FreeSpinsCount -= 1
+        else:
+            TotalMoney -= MoneyForOneRoll
+        print("You have " + str(TotalMoney) + " money.")
+
+        generate_slots()
+        CurrentRollMoney, WinningLines = calculate_slots_win()
+        print_slot(WinningLines)
+        count_scat = count_scatters()
+        FreeSpinsCount += FreeSpins[count_scat]
+        CurrentRollMoney += SymbolsCost['MAP'][count_scat]
+        TotalMoney += CurrentRollMoney
+
+        print("You got: " + str(CurrentRollMoney) + " from roll")
+
+        if FreeSpinsCount > 0:
+            print("You got " + str(FreeSpinsCount) + " free Spins")
+            print("Press, to roll free spins")
+        else:
+            print("Press, to roll spin for " + str(MoneyForOneRoll) + " moneys")
         input()
-        #os.system('cls')
+        os.system('cls||clear')
