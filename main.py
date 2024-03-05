@@ -141,7 +141,7 @@ def calculate_line_win(line):
 
 def get_money_from_left(line, in_amount):
     number_occurrence = 0
-    for ind in range(0, (len(line) - 2)):
+    for ind in range(0, (len(line) - 1)):
         number_occurrence += 1
         buf = line[ind]
         if line[ind] == 'MAP':
@@ -201,3 +201,5 @@ if __name__ == '__main__':
             print("Press, to roll spin for " + str(MoneyForOneRoll) + " moneys")
         input()
         os.system('cls||clear')
+
+
