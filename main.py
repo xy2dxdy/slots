@@ -39,16 +39,16 @@ def create_value_index_pairs(in_line_indexes):
 
 
 LineIndexes = [
-    #[0, 0, 0, 0, 0],  # Top line
-     [1, 1, 1, 1, 1],  # Middle line
-     #[2, 2, 2, 2, 2],  # Bottom line
-    # [0, 1, 2, 1, 0],  # V line
-    # [2, 1, 0, 1, 2],  # reverse V line
-    # [1, 2, 2, 2, 1],  # U line,
-    # [1, 0, 0, 0, 1],  # reverse, U line
-    # [2, 2, 1, 2, 2],
-    # [0, 0, 1, 0, 0],
-    # [1, 1, 2, 1, 1],
+    [0, 0, 0, 0, 0],  # Top line
+    [1, 1, 1, 1, 1],  # Middle line
+    [2, 2, 2, 2, 2],  # Bottom line
+    [0, 1, 2, 1, 0],  # V line
+    [2, 1, 0, 1, 2],  # reverse V line
+    [1, 2, 2, 2, 1],  # U line,
+    [1, 0, 0, 0, 1],  # reverse, U line
+    [2, 2, 1, 2, 2],
+    [0, 0, 1, 0, 0],
+    [1, 1, 2, 1, 1],
 ]
 
 LineColors = {
